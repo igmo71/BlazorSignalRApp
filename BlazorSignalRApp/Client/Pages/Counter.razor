@@ -1,0 +1,53 @@
+﻿@page "/counter"
+@using System.Timers
+
+<h2>Clock</h2>
+<p>Current Time: @dateTime</p>
+
+<h1>Counter</h1>
+<p>Current count: @currentCount</p>
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private DateTime dateTime = DateTime.Now;
+    private static Timer timer;
+
+    protected override Task OnInitializedAsync()
+    {
+        SetTimer();
+        return base.OnInitializedAsync();
+    }
+
+    private void SetTimer()
+    {
+        timer = new Timer(1000);
+        timer.Elapsed += OnTimedHandler;
+        timer.Start();
+    }
+
+    void OnTimedHandler(Object source, ElapsedEventArgs args)
+    {
+        Console.WriteLine($"args.SignalTime: {args.SignalTime}");
+        dateTime = args.SignalTime;
+        this.StateHasChanged();
+    }
+
+    private void SetAnotherTimer()
+    {
+        timer = new Timer(1000);
+        timer.Elapsed += (o, ev) =>
+        {
+            dateTime = ev.SignalTime;
+            this.StateHasChanged();
+        };
+        timer.Start();
+    }
+}

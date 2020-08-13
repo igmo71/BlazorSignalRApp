@@ -1,0 +1,34 @@
+﻿@page "/time"
+@using Microsoft.AspNetCore.SignalR.Client
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+<h3>Часы</h3>
+
+@if (CurrentTime != null)
+{
+    <span>@CurrentTime</span>
+}
+
+@code {
+    private string CurrentTime;
+    private HubConnection timeHubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        timeHubConnection = new HubConnectionBuilder().WithUrl(NavigationManager.ToAbsoluteUri("/hubs/time")).Build();
+        timeHubConnection.On<DateTime>("ShowTime", currentTime => ShowTime(currentTime));
+        await timeHubConnection.StartAsync();
+    }
+
+    private void ShowTime(DateTime dateTime)
+    {
+        CurrentTime = $"Текущее время: {dateTime:T}";
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        _ = timeHubConnection.DisposeAsync();
+    }
+}
